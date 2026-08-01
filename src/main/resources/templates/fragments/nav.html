@@ -1,0 +1,18 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<body>
+<div th:fragment="navbar" class="navbar">
+    <div class="brand">🎉 College Fest Manager</div>
+    <div class="nav-links">
+        <a th:href="@{/dashboard}">Dashboard</a>
+        <a th:href="@{/events}">Events</a>
+        <a th:href="@{/teams}">Teams</a>
+        <a th:href="@{/participants}">Participants</a>
+        <a th:href="@{/judges}">Judges</a>
+        <a th:href="@{/scores}">Scores</a>
+        <a th:href="@{/leaderboard}">Leaderboard</a>
+        <a th:href="@{/logout}" class="logout">Logout</a>
+    </div>
+</div>
+</body>
+</html>

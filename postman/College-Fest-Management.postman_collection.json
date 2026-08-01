@@ -1,0 +1,334 @@
+{
+  "info": {
+    "name": "College Fest & Hackathon Management System",
+    "description": "REST API collection for testing the College Fest Management System backend. Set the {{baseUrl}} variable to http://localhost:8080 (default).",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json"
+  },
+  "variable": [
+    { "key": "baseUrl", "value": "http://localhost:8080", "type": "string" },
+    { "key": "eventId", "value": "1", "type": "string" },
+    { "key": "teamId", "value": "1", "type": "string" },
+    { "key": "participantId", "value": "1", "type": "string" },
+    { "key": "judgeId", "value": "1", "type": "string" },
+    { "key": "scoreId", "value": "1", "type": "string" }
+  ],
+  "item": [
+    {
+      "name": "Auth",
+      "item": [
+        {
+          "name": "Login (admin)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"username\": \"admin\",\n  \"password\": \"admin123\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/auth/login", "host": ["{{baseUrl}}"], "path": ["api", "auth", "login"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Events",
+      "item": [
+        {
+          "name": "Get All Events",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api", "events"] }
+          }
+        },
+        {
+          "name": "Get Event By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/events/{{eventId}}", "host": ["{{baseUrl}}"], "path": ["api", "events", "{{eventId}}"] }
+          }
+        },
+        {
+          "name": "Create Event",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CodeStorm Hackathon\",\n  \"description\": \"24-hour coding hackathon\",\n  \"venue\": \"Main Auditorium\",\n  \"category\": \"Hackathon\",\n  \"startTime\": \"2026-08-10T09:00:00\",\n  \"endTime\": \"2026-08-11T09:00:00\",\n  \"maxTeamSize\": 4\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api", "events"] }
+          }
+        },
+        {
+          "name": "Create Event (Venue Conflict Example - should fail)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Overlapping Event\",\n  \"description\": \"Should trigger a venue conflict\",\n  \"venue\": \"Main Auditorium\",\n  \"category\": \"Hackathon\",\n  \"startTime\": \"2026-08-10T12:00:00\",\n  \"endTime\": \"2026-08-10T18:00:00\",\n  \"maxTeamSize\": 4\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/events", "host": ["{{baseUrl}}"], "path": ["api", "events"] }
+          }
+        },
+        {
+          "name": "Update Event",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"CodeStorm Hackathon (Updated)\",\n  \"description\": \"24-hour coding hackathon - updated\",\n  \"venue\": \"Main Auditorium\",\n  \"category\": \"Hackathon\",\n  \"startTime\": \"2026-08-10T09:00:00\",\n  \"endTime\": \"2026-08-11T09:00:00\",\n  \"maxTeamSize\": 4\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/events/{{eventId}}", "host": ["{{baseUrl}}"], "path": ["api", "events", "{{eventId}}"] }
+          }
+        },
+        {
+          "name": "Delete Event",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/events/{{eventId}}", "host": ["{{baseUrl}}"], "path": ["api", "events", "{{eventId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Teams",
+      "item": [
+        {
+          "name": "Get All Teams",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/teams", "host": ["{{baseUrl}}"], "path": ["api", "teams"] }
+          }
+        },
+        {
+          "name": "Get Team By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/teams/{{teamId}}", "host": ["{{baseUrl}}"], "path": ["api", "teams", "{{teamId}}"] }
+          }
+        },
+        {
+          "name": "Register Team",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamName\": \"Byte Busters\",\n  \"leaderName\": \"Rohan Mehta\",\n  \"leaderEmail\": \"rohan.mehta@example.edu\",\n  \"leaderPhone\": \"9998887771\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/teams?eventId={{eventId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "teams"],
+              "query": [{ "key": "eventId", "value": "{{eventId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Update Team",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"teamName\": \"Byte Busters\",\n  \"leaderName\": \"Rohan Mehta\",\n  \"leaderEmail\": \"rohan.mehta@example.edu\",\n  \"leaderPhone\": \"9998887771\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/teams/{{teamId}}", "host": ["{{baseUrl}}"], "path": ["api", "teams", "{{teamId}}"] }
+          }
+        },
+        {
+          "name": "Delete Team",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/teams/{{teamId}}", "host": ["{{baseUrl}}"], "path": ["api", "teams", "{{teamId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Participants",
+      "item": [
+        {
+          "name": "Get All Participants",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/participants", "host": ["{{baseUrl}}"], "path": ["api", "participants"] }
+          }
+        },
+        {
+          "name": "Get Participant By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/participants/{{participantId}}", "host": ["{{baseUrl}}"], "path": ["api", "participants", "{{participantId}}"] }
+          }
+        },
+        {
+          "name": "Add Participant",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aditi Rao\",\n  \"email\": \"aditi.rao@example.edu\",\n  \"phone\": \"9998887701\",\n  \"college\": \"ABC College of Engineering\"\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/participants?teamId={{teamId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "participants"],
+              "query": [{ "key": "teamId", "value": "{{teamId}}" }]
+            }
+          }
+        },
+        {
+          "name": "Update Participant",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Aditi Rao\",\n  \"email\": \"aditi.rao@example.edu\",\n  \"phone\": \"9998887701\",\n  \"college\": \"ABC College of Engineering\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/participants/{{participantId}}", "host": ["{{baseUrl}}"], "path": ["api", "participants", "{{participantId}}"] }
+          }
+        },
+        {
+          "name": "Delete Participant",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/participants/{{participantId}}", "host": ["{{baseUrl}}"], "path": ["api", "participants", "{{participantId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Judges",
+      "item": [
+        {
+          "name": "Get All Judges",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/judges", "host": ["{{baseUrl}}"], "path": ["api", "judges"] }
+          }
+        },
+        {
+          "name": "Get Judge By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/judges/{{judgeId}}", "host": ["{{baseUrl}}"], "path": ["api", "judges", "{{judgeId}}"] }
+          }
+        },
+        {
+          "name": "Create Judge",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Anjali Deshmukh\",\n  \"email\": \"anjali.deshmukh@example.edu\",\n  \"phone\": \"9876543210\",\n  \"expertise\": \"AI/ML\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/judges", "host": ["{{baseUrl}}"], "path": ["api", "judges"] }
+          }
+        },
+        {
+          "name": "Update Judge",
+          "request": {
+            "method": "PUT",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"name\": \"Dr. Anjali Deshmukh\",\n  \"email\": \"anjali.deshmukh@example.edu\",\n  \"phone\": \"9876543210\",\n  \"expertise\": \"AI/ML & Data Science\"\n}"
+            },
+            "url": { "raw": "{{baseUrl}}/api/judges/{{judgeId}}", "host": ["{{baseUrl}}"], "path": ["api", "judges", "{{judgeId}}"] }
+          }
+        },
+        {
+          "name": "Delete Judge",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/judges/{{judgeId}}", "host": ["{{baseUrl}}"], "path": ["api", "judges", "{{judgeId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Scores",
+      "item": [
+        {
+          "name": "Get All Scores",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/scores", "host": ["{{baseUrl}}"], "path": ["api", "scores"] }
+          }
+        },
+        {
+          "name": "Get Score By Id",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/scores/{{scoreId}}", "host": ["{{baseUrl}}"], "path": ["api", "scores", "{{scoreId}}"] }
+          }
+        },
+        {
+          "name": "Submit Score (create or update)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"innovation\": 8.5,\n  \"technicalImplementation\": 8.0,\n  \"presentation\": 7.5,\n  \"uiUx\": 8.0,\n  \"overallImpression\": 8.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/scores?teamId={{teamId}}&judgeId={{judgeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scores"],
+              "query": [
+                { "key": "teamId", "value": "{{teamId}}" },
+                { "key": "judgeId", "value": "{{judgeId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Submit Score (Invalid - out of range, should fail)",
+          "request": {
+            "method": "POST",
+            "header": [{ "key": "Content-Type", "value": "application/json" }],
+            "body": {
+              "mode": "raw",
+              "raw": "{\n  \"innovation\": 15,\n  \"technicalImplementation\": 8.0,\n  \"presentation\": 7.5,\n  \"uiUx\": 8.0,\n  \"overallImpression\": 8.0\n}"
+            },
+            "url": {
+              "raw": "{{baseUrl}}/api/scores?teamId={{teamId}}&judgeId={{judgeId}}",
+              "host": ["{{baseUrl}}"],
+              "path": ["api", "scores"],
+              "query": [
+                { "key": "teamId", "value": "{{teamId}}" },
+                { "key": "judgeId", "value": "{{judgeId}}" }
+              ]
+            }
+          }
+        },
+        {
+          "name": "Delete Score",
+          "request": {
+            "method": "DELETE",
+            "url": { "raw": "{{baseUrl}}/api/scores/{{scoreId}}", "host": ["{{baseUrl}}"], "path": ["api", "scores", "{{scoreId}}"] }
+          }
+        }
+      ]
+    },
+    {
+      "name": "Leaderboard",
+      "item": [
+        {
+          "name": "Get Leaderboard",
+          "request": {
+            "method": "GET",
+            "url": { "raw": "{{baseUrl}}/api/leaderboard", "host": ["{{baseUrl}}"], "path": ["api", "leaderboard"] }
+          }
+        }
+      ]
+    }
+  ]
+}

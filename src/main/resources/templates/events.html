@@ -1,0 +1,55 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Events</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Events</h1>
+        <a th:href="@{/events/new}" class="btn">+ Add Event</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Name</th>
+            <th>Venue</th>
+            <th>Category</th>
+            <th>Start</th>
+            <th>End</th>
+            <th>Max Team Size</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(events)}" class="empty-row">
+            <td colspan="7">No events yet. Click "Add Event" to create one.</td>
+        </tr>
+        <tr th:each="event : ${events}">
+            <td th:text="${event.name}">Name</td>
+            <td th:text="${event.venue}">Venue</td>
+            <td><span class="badge" th:text="${event.category}">Category</span></td>
+            <td th:text="${#temporals.format(event.startTime, 'dd MMM yyyy, HH:mm')}">Start</td>
+            <td th:text="${#temporals.format(event.endTime, 'dd MMM yyyy, HH:mm')}">End</td>
+            <td th:text="${event.maxTeamSize}">0</td>
+            <td>
+                <a th:href="@{/events/{id}/edit(id=${event.id})}" class="btn btn-sm btn-secondary">Edit</a>
+                <form th:action="@{/events/{id}/delete(id=${event.id})}" method="post" style="display:inline"
+                      onsubmit="return confirm('Delete this event? This will also remove its teams.');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

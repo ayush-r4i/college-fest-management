@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Judge Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 th:text="${pageTitle}">Add Judge</h1>
+    </div>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <form th:action="${judge.id == null} ? @{/judges} : @{/judges/{id}(id=${judge.id})}"
+              th:object="${judge}" method="post">
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" th:field="*{name}" required placeholder="e.g. Dr. Anjali Deshmukh">
+                <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}" required>
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" th:field="*{phone}">
+            </div>
+
+            <div class="form-group">
+                <label for="expertise">Expertise</label>
+                <input type="text" id="expertise" th:field="*{expertise}" placeholder="e.g. AI/ML, Software Engineering">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Judge</button>
+                <a th:href="@{/judges}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

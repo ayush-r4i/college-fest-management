@@ -1,0 +1,66 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Team Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 th:text="${pageTitle}">Register Team</h1>
+    </div>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <form th:action="${team.id == null} ? @{/teams} : @{/teams/{id}(id=${team.id})}"
+              th:object="${team}" method="post">
+
+            <div class="form-group">
+                <label for="eventId">Event</label>
+                <select id="eventId" name="eventId" th:disabled="${team.id != null}" required>
+                    <option value="">-- Select Event --</option>
+                    <option th:each="ev : ${events}"
+                            th:value="${ev.id}"
+                            th:text="${ev.name} + ' (max team size: ' + ${ev.maxTeamSize} + ')'"
+                            th:selected="${team.event != null and team.event.id == ev.id}"></option>
+                </select>
+                <div class="field-error" th:if="${team.id != null}" style="color:#6b7280;font-size:0.8rem;margin-top:0.25rem">
+                    The event cannot be changed after a team is registered.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="teamName">Team Name</label>
+                <input type="text" id="teamName" th:field="*{teamName}" required placeholder="e.g. Byte Busters">
+                <div class="field-error" th:if="${#fields.hasErrors('teamName')}" th:errors="*{teamName}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="leaderName">Leader Name</label>
+                <input type="text" id="leaderName" th:field="*{leaderName}" required>
+                <div class="field-error" th:if="${#fields.hasErrors('leaderName')}" th:errors="*{leaderName}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="leaderEmail">Leader Email</label>
+                <input type="email" id="leaderEmail" th:field="*{leaderEmail}">
+            </div>
+
+            <div class="form-group">
+                <label for="leaderPhone">Leader Phone</label>
+                <input type="tel" id="leaderPhone" th:field="*{leaderPhone}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Team</button>
+                <a th:href="@{/teams}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

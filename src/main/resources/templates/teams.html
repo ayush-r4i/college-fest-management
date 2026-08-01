@@ -1,0 +1,51 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Teams</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Teams</h1>
+        <a th:href="@{/teams/new}" class="btn">+ Register Team</a>
+    </div>
+
+    <div class="alert alert-success" th:if="${success}" th:text="${success}"></div>
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <table>
+        <thead>
+        <tr>
+            <th>Team Name</th>
+            <th>Event</th>
+            <th>Leader</th>
+            <th>Members</th>
+            <th>Actions</th>
+        </tr>
+        </thead>
+        <tbody>
+        <tr th:if="${#lists.isEmpty(teams)}" class="empty-row">
+            <td colspan="5">No teams registered yet.</td>
+        </tr>
+        <tr th:each="team : ${teams}">
+            <td th:text="${team.teamName}">Team</td>
+            <td th:text="${team.event != null ? team.event.name : ''}">Event</td>
+            <td th:text="${team.leaderName}">Leader</td>
+            <td th:text="${#lists.size(team.participants)} + ' / ' + (${team.event != null} ? ${team.event.maxTeamSize} : '?')">0 / 4</td>
+            <td>
+                <a th:href="@{/teams/{id}/edit(id=${team.id})}" class="btn btn-sm btn-secondary">Edit</a>
+                <form th:action="@{/teams/{id}/delete(id=${team.id})}" method="post" style="display:inline"
+                      onsubmit="return confirm('Delete this team? This will also remove its participants and scores.');">
+                    <button type="submit" class="btn btn-sm btn-danger">Delete</button>
+                </form>
+            </td>
+        </tr>
+        </tbody>
+    </table>
+</div>
+</body>
+</html>

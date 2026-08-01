@@ -1,0 +1,134 @@
+package com.collegefest.management.service;
+
+import com.collegefest.management.dto.LeaderboardEntry;
+import com.collegefest.management.entity.Judge;
+import com.collegefest.management.entity.Score;
+import com.collegefest.management.entity.Team;
+import com.collegefest.management.exception.InvalidScoreException;
+import com.collegefest.management.exception.ResourceNotFoundException;
+import com.collegefest.management.repository.ScoreRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.Comparator;
+import java.util.List;
+import java.util.Map;
+import java.util.stream.Collectors;
+
+@Service
+public class ScoreService {
+
+    private final ScoreRepository scoreRepository;
+    private final TeamService teamService;
+    private final JudgeService judgeService;
+
+    @Autowired
+    public ScoreService(ScoreRepository scoreRepository, TeamService teamService, JudgeService judgeService) {
+        this.scoreRepository = scoreRepository;
+        this.teamService = teamService;
+        this.judgeService = judgeService;
+    }
+
+    public List<Score> getAllScores() {
+        return scoreRepository.findAll();
+    }
+
+    public Score getScoreById(Long id) {
+        return scoreRepository.findById(id)
+                .orElseThrow(() -> new ResourceNotFoundException("Score not found with id: " + id));
+    }
+
+    /**
+     * Creates a new score, or updates the existing one if this judge has already
+     * scored this team (one score per judge per team).
+     */
+    @Transactional
+    public Score submitScore(Score incoming, Long teamId, Long judgeId) {
+        Team team = teamService.getTeamById(teamId);
+        Judge judge = judgeService.getJudgeById(judgeId);
+
+        validateScoreValues(incoming);
+
+        Score score = scoreRepository.findByTeamIdAndJudgeId(teamId, judgeId).orElseGet(Score::new);
+        score.setTeam(team);
+        score.setJudge(judge);
+        score.setInnovation(incoming.getInnovation());
+        score.setTechnicalImplementation(incoming.getTechnicalImplementation());
+        score.setPresentation(incoming.getPresentation());
+        score.setUiUx(incoming.getUiUx());
+        score.setOverallImpression(incoming.getOverallImpression());
+        score.setFinalScore(calculateFinalScore(incoming));
+
+        return scoreRepository.save(score);
+    }
+
+    @Transactional
+    public void deleteScore(Long id) {
+        Score existing = getScoreById(id);
+        scoreRepository.delete(existing);
+    }
+
+    private void validateScoreValues(Score score) {
+        double[] values = {
+                nullToZeroCheck(score.getInnovation(), "Innovation"),
+                nullToZeroCheck(score.getTechnicalImplementation(), "Technical Implementation"),
+                nullToZeroCheck(score.getPresentation(), "Presentation"),
+                nullToZeroCheck(score.getUiUx(), "UI/UX"),
+                nullToZeroCheck(score.getOverallImpression(), "Overall Impression")
+        };
+        for (double v : values) {
+            if (v < 0.0 || v > 10.0) {
+                throw new InvalidScoreException("All score fields must be between 0 and 10");
+            }
+        }
+    }
+
+    private double nullToZeroCheck(Double value, String fieldName) {
+        if (value == null) {
+            throw new InvalidScoreException(fieldName + " score is required");
+        }
+        return value;
+    }
+
+    /** Final score = average of the five judging criteria, rounded to 2 decimal places. */
+    private double calculateFinalScore(Score score) {
+        double sum = score.getInnovation() + score.getTechnicalImplementation()
+                + score.getPresentation() + score.getUiUx() + score.getOverallImpression();
+        double average = sum / 5.0;
+        return Math.round(average * 100.0) / 100.0;
+    }
+
+    /**
+     * Builds the live leaderboard: for every team that has at least one score,
+     * average its final scores across all judges, then rank teams highest-first.
+     */
+    public List<LeaderboardEntry> getLeaderboard() {
+        List<Score> allScores = scoreRepository.findAll();
+
+        Map<Long, List<Score>> scoresByTeam = allScores.stream()
+                .collect(Collectors.groupingBy(s -> s.getTeam().getId()));
+
+        List<LeaderboardEntry> entries = scoresByTeam.entrySet().stream()
+                .map(entry -> {
+                    List<Score> teamScores = entry.getValue();
+                    Team team = teamScores.get(0).getTeam();
+                    double avg = teamScores.stream().mapToDouble(Score::getFinalScore).average().orElse(0.0);
+                    avg = Math.round(avg * 100.0) / 100.0;
+                    return new LeaderboardEntry(
+                            team.getId(),
+                            team.getTeamName(),
+                            team.getEvent() != null ? team.getEvent().getName() : "",
+                            avg,
+                            teamScores.size());
+                })
+                .sorted(Comparator.comparingDouble(LeaderboardEntry::getAverageScore).reversed())
+                .collect(Collectors.toList());
+
+        int rank = 1;
+        for (LeaderboardEntry entry : entries) {
+            entry.setRank(rank++);
+        }
+        return entries;
+    }
+}

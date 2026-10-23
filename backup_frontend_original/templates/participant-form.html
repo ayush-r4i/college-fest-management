@@ -1,0 +1,69 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Participant Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 th:text="${pageTitle}">Add Participant</h1>
+    </div>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <form th:action="${participant.id == null} ? @{/participants} : @{/participants/{id}(id=${participant.id})}"
+              th:object="${participant}" method="post">
+
+            <div class="form-group" th:if="${participant.id == null}">
+                <label for="teamId">Team</label>
+                <select id="teamId" name="teamId" required>
+                    <option value="">-- Select Team --</option>
+                    <option th:each="t : ${teams}"
+                            th:value="${t.id}"
+                            th:text="${t.teamName} + ' (' + (${t.event != null} ? ${t.event.name} : '') + ')'"></option>
+                </select>
+            </div>
+            <div class="form-group" th:if="${participant.id != null}">
+                <label>Team</label>
+                <input type="text" th:value="${participant.team != null ? participant.team.teamName : ''}" disabled>
+                <div style="color:#6b7280;font-size:0.8rem;margin-top:0.25rem">
+                    Delete and re-add the participant to move them to a different team.
+                </div>
+            </div>
+
+            <div class="form-group">
+                <label for="name">Name</label>
+                <input type="text" id="name" th:field="*{name}" required>
+                <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="email">Email</label>
+                <input type="email" id="email" th:field="*{email}">
+                <div class="field-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="phone">Phone</label>
+                <input type="tel" id="phone" th:field="*{phone}">
+            </div>
+
+            <div class="form-group">
+                <label for="college">College</label>
+                <input type="text" id="college" th:field="*{college}">
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Participant</button>
+                <a th:href="@{/participants}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

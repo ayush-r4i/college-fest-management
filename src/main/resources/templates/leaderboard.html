@@ -2,44 +2,87 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' - College Fest Manager'">Leaderboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
-    <meta http-equiv="refresh" content="15">
+    <meta th:if="${selectedEventId != null}" http-equiv="refresh" th:content="'15;url=' + @{/leaderboard(eventId=${selectedEventId})}">
 </head>
 <body>
 <div th:replace="~{fragments/nav :: navbar}"></div>
 
 <div class="container">
     <div class="page-header">
-        <h1>🏆 Live Leaderboard</h1>
+        <div class="page-title-group">
+            <h1>Live Leaderboard</h1>
+            <p class="page-subtitle">Event-specific standings ranked by average judge evaluations</p>
+        </div>
+        <div th:if="${selectedEventId != null}" style="display: inline-flex; align-items: center; gap: 0.5rem; background-color: var(--surface); border: 1px solid var(--border); padding: 0.35rem 0.75rem; border-radius: var(--radius-full); font-size: 0.75rem; color: var(--text-muted);">
+            <span style="display:inline-block; width:6px; height:6px; border-radius:50%; background-color:#10B981;"></span>
+            <span>Live Sync &bull; 15s interval</span>
+        </div>
     </div>
-    <p style="color:#6b7280;font-size:0.85rem;margin-top:-0.5rem">
-        This page auto-refreshes every 15 seconds so scores update live as judges submit them.
-    </p>
 
-    <table>
-        <thead>
-        <tr>
-            <th>Rank</th>
-            <th>Team</th>
-            <th>Event</th>
-            <th>Judges Scored</th>
-            <th>Final Score</th>
-        </tr>
-        </thead>
-        <tbody>
-        <tr th:if="${#lists.isEmpty(leaderboard)}" class="empty-row">
-            <td colspan="5">No scores submitted yet. The leaderboard will populate as judges score teams.</td>
-        </tr>
-        <tr th:each="entry : ${leaderboard}" th:classappend="'rank-' + ${entry.rank}">
-            <td><span class="rank-badge" th:text="${entry.rank}">1</span></td>
-            <td th:text="${entry.teamName}">Team</td>
-            <td th:text="${entry.eventName}">Event</td>
-            <td th:text="${entry.numberOfJudgesScored}">0</td>
-            <td class="final-score" th:text="${entry.averageScore}">0.0</td>
-        </tr>
-        </tbody>
-    </table>
+    <!-- Event Selector Card -->
+    <div class="card" style="margin-bottom: 1.5rem; padding: 1rem 1.25rem;">
+        <form th:action="@{/leaderboard}" method="get" id="eventFilterForm" style="display: flex; align-items: center; gap: 1rem; flex-wrap: wrap;">
+            <label for="eventId" style="font-weight: 600; font-size: 0.875rem; color: var(--text-primary); margin-bottom: 0; white-space: nowrap;">
+                Select Event:
+            </label>
+            <select id="eventId" name="eventId" onchange="this.form.submit()" style="max-width: 360px; padding: 0.45rem 0.75rem; font-size: 0.875rem;">
+                <option value="">Select Event</option>
+                <option th:each="ev : ${events}"
+                        th:value="${ev.id}"
+                        th:text="${ev.name} + ' (' + ${ev.category} + ')'"
+                        th:selected="${selectedEventId != null and selectedEventId == ev.id}"></option>
+            </select>
+            <noscript>
+                <button type="submit" class="btn btn-secondary btn-sm">Filter</button>
+            </noscript>
+            <span th:if="${selectedEvent != null}" class="badge" th:text="${selectedEvent.venue} + ' &bull; Max team size: ' + ${selectedEvent.maxTeamSize}">
+                Auditorium
+            </span>
+        </form>
+    </div>
+
+    <!-- State 1: No Event Selected -->
+    <div th:if="${selectedEventId == null}" class="card" style="text-align: center; padding: 3.5rem 1.5rem;">
+        <svg style="width: 40px; height: 40px; color: var(--text-subtle); margin: 0 auto 0.75rem;" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round">
+            <line x1="18" y1="20" x2="18" y2="10"></line>
+            <line x1="12" y1="20" x2="12" y2="4"></line>
+            <line x1="6" y1="20" x2="6" y2="14"></line>
+        </svg>
+        <h3 style="font-size: 1.1rem; font-weight: 600; color: var(--text-primary); margin-bottom: 0.35rem;">Please select an event</h3>
+        <p style="color: var(--text-muted); font-size: 0.875rem; max-width: 460px; margin: 0 auto;">
+            Choose a competition event from the dropdown above to view ranked team standings and judge evaluations for that specific event.
+        </p>
+    </div>
+
+    <!-- State 2: Event Selected (Display Leaderboard Table) -->
+    <div th:if="${selectedEventId != null}" class="table-responsive">
+        <table>
+            <thead>
+            <tr>
+                <th style="width: 70px;">Rank</th>
+                <th>Team Name</th>
+                <th>Event</th>
+                <th style="text-align: right;">Judges Evaluated</th>
+                <th style="text-align: right;">Composite Score</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(leaderboard)}" class="empty-row">
+                <td colspan="5">No scores have been submitted for this event yet. Rankings will generate in real time as judges evaluate teams.</td>
+            </tr>
+            <tr th:each="entry : ${leaderboard}" th:classappend="'rank-' + ${entry.rank}">
+                <td><span class="rank-badge" th:text="${entry.rank}">1</span></td>
+                <td><strong th:text="${entry.teamName}">Team Name</strong></td>
+                <td><span class="badge" th:text="${entry.eventName}">Event</span></td>
+                <td style="text-align: right;" th:text="${entry.numberOfJudgesScored}">0</td>
+                <td style="text-align: right;" class="final-score" th:text="${entry.averageScore}">0.0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
 </div>
 </body>
 </html>

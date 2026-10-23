@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.Collections;
 import java.util.Comparator;
 import java.util.List;
 import java.util.Map;
@@ -100,13 +101,26 @@ public class ScoreService {
     }
 
     /**
-     * Builds the live leaderboard: for every team that has at least one score,
+     * Builds the live leaderboard across all events: for every team that has at least one score,
      * average its final scores across all judges, then rank teams highest-first.
      */
     public List<LeaderboardEntry> getLeaderboard() {
-        List<Score> allScores = scoreRepository.findAll();
+        return buildLeaderboardFromScores(scoreRepository.findAll());
+    }
 
-        Map<Long, List<Score>> scoresByTeam = allScores.stream()
+    /**
+     * Builds the live leaderboard filtered by event: for every team in the specified event
+     * that has at least one score, average its final scores across all judges, then rank highest-first.
+     */
+    public List<LeaderboardEntry> getLeaderboardByEventId(Long eventId) {
+        if (eventId == null) {
+            return Collections.emptyList();
+        }
+        return buildLeaderboardFromScores(scoreRepository.findByTeamEventId(eventId));
+    }
+
+    private List<LeaderboardEntry> buildLeaderboardFromScores(List<Score> scores) {
+        Map<Long, List<Score>> scoresByTeam = scores.stream()
                 .collect(Collectors.groupingBy(s -> s.getTeam().getId()));
 
         List<LeaderboardEntry> entries = scoresByTeam.entrySet().stream()

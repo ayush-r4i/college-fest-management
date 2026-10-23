@@ -1,6 +1,7 @@
 package com.collegefest.management.service;
 
 import com.collegefest.management.entity.Event;
+import com.collegefest.management.entity.Participant;
 import com.collegefest.management.entity.Team;
 import com.collegefest.management.exception.DuplicateResourceException;
 import com.collegefest.management.exception.ResourceNotFoundException;
@@ -10,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -46,30 +48,62 @@ public class TeamService {
                     "A team named \"" + team.getTeamName() + "\" is already registered for this event");
         }
 
-        // If the team is registered together with an initial list of participants,
-        // make sure that list alone does not already exceed the event's member limit.
-        int initialParticipants = team.getParticipants() == null ? 0 : team.getParticipants().size();
-        if (initialParticipants > event.getMaxTeamSize()) {
+        team.setEvent(event);
+
+        if (team.getParticipants() == null) {
+            team.setParticipants(new ArrayList<>());
+        }
+
+        // Automatically add the team leader as Participant #1 if not already present
+        boolean leaderAlreadyPresent = team.getParticipants().stream()
+                .anyMatch(p -> p.getName() != null && p.getName().trim().equalsIgnoreCase(team.getLeaderName().trim()));
+
+        if (!leaderAlreadyPresent) {
+            Participant leader = new Participant();
+            leader.setName(team.getLeaderName().trim());
+            leader.setEmail(team.getLeaderEmail());
+            leader.setPhone(team.getLeaderPhone());
+            leader.setTeam(team);
+            team.getParticipants().add(0, leader);
+        }
+
+        // Check that initial participants list (including the leader) does not exceed event limits
+        int totalParticipants = team.getParticipants().size();
+        if (totalParticipants > event.getMaxTeamSize()) {
             throw new TeamCapacityExceededException(
-                    "Team \"" + team.getTeamName() + "\" has " + initialParticipants +
+                    "Team \"" + team.getTeamName() + "\" has " + totalParticipants +
                             " members, which exceeds the limit of " + event.getMaxTeamSize() +
                             " for event \"" + event.getName() + "\"");
         }
 
-        team.setEvent(event);
-        if (team.getParticipants() != null) {
-            team.getParticipants().forEach(p -> p.setTeam(team));
-        }
+        team.getParticipants().forEach(p -> p.setTeam(team));
         return teamRepository.save(team);
     }
 
     @Transactional
     public Team updateTeam(Long id, Team updated) {
         Team existing = getTeamById(id);
+        String oldLeaderName = existing.getLeaderName();
+        String oldLeaderEmail = existing.getLeaderEmail();
+
         existing.setTeamName(updated.getTeamName());
         existing.setLeaderName(updated.getLeaderName());
         existing.setLeaderEmail(updated.getLeaderEmail());
         existing.setLeaderPhone(updated.getLeaderPhone());
+
+        // Keep leader participant record in sync if present
+        if (existing.getParticipants() != null && !existing.getParticipants().isEmpty()) {
+            for (Participant p : existing.getParticipants()) {
+                if ((oldLeaderName != null && oldLeaderName.trim().equalsIgnoreCase(p.getName() != null ? p.getName().trim() : ""))
+                        || (oldLeaderEmail != null && !oldLeaderEmail.trim().isEmpty() && oldLeaderEmail.trim().equalsIgnoreCase(p.getEmail() != null ? p.getEmail().trim() : ""))) {
+                    p.setName(updated.getLeaderName());
+                    p.setEmail(updated.getLeaderEmail());
+                    p.setPhone(updated.getLeaderPhone());
+                    break;
+                }
+            }
+        }
+
         return teamRepository.save(existing);
     }
 

@@ -5,6 +5,7 @@ import com.collegefest.management.service.ScoreService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
+import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 
 import java.util.List;
@@ -21,7 +22,10 @@ public class LeaderboardApiController {
     }
 
     @GetMapping
-    public List<LeaderboardEntry> getLeaderboard() {
+    public List<LeaderboardEntry> getLeaderboard(@RequestParam(required = false) Long eventId) {
+        if (eventId != null) {
+            return scoreService.getLeaderboardByEventId(eventId);
+        }
         return scoreService.getLeaderboard();
     }
 }

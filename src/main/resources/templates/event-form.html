@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' - College Fest Manager'">Event Form</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
@@ -9,13 +10,24 @@
 <div th:replace="~{fragments/nav :: navbar}"></div>
 
 <div class="container">
-    <div class="page-header">
-        <h1 th:text="${pageTitle}">Add Event</h1>
+    <div class="page-header" style="max-width: 640px; margin: 0 auto 1.5rem;">
+        <div class="page-title-group">
+            <h1 th:text="${pageTitle}">Add Event</h1>
+            <p class="page-subtitle">Configure event parameters, schedules, and capacity limits</p>
+        </div>
+        <a th:href="@{/events}" class="btn btn-secondary btn-sm">&larr; Back to Events</a>
     </div>
 
-    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
-
     <div class="card form-card">
+        <div class="alert alert-error" th:if="${error}">
+            <svg style="width:16px;height:16px;flex-shrink:0" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                <circle cx="12" cy="12" r="10"></circle>
+                <line x1="12" y1="8" x2="12" y2="12"></line>
+                <line x1="12" y1="16" x2="12.01" y2="16"></line>
+            </svg>
+            <span th:text="${error}">An error occurred</span>
+        </div>
+
         <form th:action="${event.id == null} ? @{/events} : @{/events/{id}(id=${event.id})}"
               th:object="${event}" method="post">
 
@@ -27,36 +39,40 @@
 
             <div class="form-group">
                 <label for="description">Description</label>
-                <textarea id="description" th:field="*{description}" placeholder="Short description of the event"></textarea>
+                <textarea id="description" th:field="*{description}" placeholder="Summary of competition rules and objectives"></textarea>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="venue">Venue</label>
+                    <input type="text" id="venue" th:field="*{venue}" required placeholder="e.g. Main Auditorium">
+                    <div class="field-error" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="category">Category</label>
+                    <input type="text" id="category" th:field="*{category}" required placeholder="e.g. Hackathon, Cultural">
+                    <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+                </div>
+            </div>
+
+            <div class="form-grid-2">
+                <div class="form-group">
+                    <label for="startTime">Start Date & Time</label>
+                    <input type="datetime-local" id="startTime" th:field="*{startTime}" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+                </div>
+
+                <div class="form-group">
+                    <label for="endTime">End Date & Time</label>
+                    <input type="datetime-local" id="endTime" th:field="*{endTime}" required>
+                    <div class="field-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
+                </div>
             </div>
 
             <div class="form-group">
-                <label for="venue">Venue</label>
-                <input type="text" id="venue" th:field="*{venue}" required placeholder="e.g. Main Auditorium">
-                <div class="field-error" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="category">Category</label>
-                <input type="text" id="category" th:field="*{category}" required placeholder="e.g. Hackathon, Cultural, Sports">
-                <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="startTime">Start Time</label>
-                <input type="datetime-local" id="startTime" th:field="*{startTime}" required>
-                <div class="field-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="endTime">End Time</label>
-                <input type="datetime-local" id="endTime" th:field="*{endTime}" required>
-                <div class="field-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
-            </div>
-
-            <div class="form-group">
-                <label for="maxTeamSize">Max Team Size</label>
-                <input type="number" id="maxTeamSize" th:field="*{maxTeamSize}" min="1" required>
+                <label for="maxTeamSize">Maximum Team Size (Members)</label>
+                <input type="number" id="maxTeamSize" th:field="*{maxTeamSize}" min="1" required style="max-width: 200px;">
                 <div class="field-error" th:if="${#fields.hasErrors('maxTeamSize')}" th:errors="*{maxTeamSize}"></div>
             </div>
 

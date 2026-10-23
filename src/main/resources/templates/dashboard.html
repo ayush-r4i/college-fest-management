@@ -2,6 +2,7 @@
 <html xmlns:th="http://www.thymeleaf.org">
 <head>
     <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title th:text="${pageTitle} + ' - College Fest Manager'">Dashboard</title>
     <link rel="stylesheet" th:href="@{/css/style.css}">
 </head>
@@ -10,60 +11,94 @@
 
 <div class="container">
     <div class="page-header">
-        <h1>Dashboard</h1>
+        <div class="page-title-group">
+            <h1>Dashboard</h1>
+            <p class="page-subtitle">Real-time overview of fest operations, registrations, and leaderboard</p>
+        </div>
+        <div class="header-actions">
+            <a th:href="@{/events/new}" class="btn btn-secondary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Add Event</span>
+            </a>
+            <a th:href="@{/teams/new}" class="btn btn-secondary btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <line x1="12" y1="5" x2="12" y2="19"></line>
+                    <line x1="5" y1="12" x2="19" y2="12"></line>
+                </svg>
+                <span>Register Team</span>
+            </a>
+            <a th:href="@{/scores/new}" class="btn btn-sm">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-linecap="round" stroke-linejoin="round">
+                    <polyline points="9 11 12 14 22 4"></polyline>
+                    <path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"></path>
+                </svg>
+                <span>Submit Score</span>
+            </a>
+        </div>
     </div>
 
+    <!-- Metrics Grid -->
     <div class="stats-grid">
         <div class="stat-card">
+            <span class="label">Events</span>
             <div class="value" th:text="${eventCount}">0</div>
-            <div class="label">Events</div>
         </div>
         <div class="stat-card">
+            <span class="label">Teams</span>
             <div class="value" th:text="${teamCount}">0</div>
-            <div class="label">Teams</div>
         </div>
         <div class="stat-card">
+            <span class="label">Participants</span>
             <div class="value" th:text="${participantCount}">0</div>
-            <div class="label">Participants</div>
         </div>
         <div class="stat-card">
+            <span class="label">Panel Judges</span>
             <div class="value" th:text="${judgeCount}">0</div>
-            <div class="label">Judges</div>
         </div>
         <div class="stat-card">
+            <span class="label">Scores Logged</span>
             <div class="value" th:text="${scoreCount}">0</div>
-            <div class="label">Scores Submitted</div>
         </div>
     </div>
 
+    <!-- Top 5 Standings -->
     <div class="card">
-        <div class="page-header">
-            <h1 style="font-size:1.15rem">Top 5 Leaderboard</h1>
-            <a th:href="@{/leaderboard}" class="btn btn-sm btn-secondary">View Full Leaderboard</a>
+        <div class="page-header" style="margin-bottom: 1rem;">
+            <div class="page-title-group">
+                <h2 style="font-size: 1.1rem; font-weight: 600;">Top Standings</h2>
+                <p class="page-subtitle">Leading teams across all evaluated events</p>
+            </div>
+            <a th:href="@{/leaderboard}" class="btn btn-secondary btn-sm">View Full Leaderboard &rarr;</a>
         </div>
-        <table>
-            <thead>
-            <tr>
-                <th>Rank</th>
-                <th>Team</th>
-                <th>Event</th>
-                <th>Judges Scored</th>
-                <th>Final Score</th>
-            </tr>
-            </thead>
-            <tbody>
-            <tr th:if="${#lists.isEmpty(leaderboard)}" class="empty-row">
-                <td colspan="5">No scores submitted yet.</td>
-            </tr>
-            <tr th:each="entry : ${leaderboard}">
-                <td><span class="rank-badge" th:text="${entry.rank}">1</span></td>
-                <td th:text="${entry.teamName}">Team</td>
-                <td th:text="${entry.eventName}">Event</td>
-                <td th:text="${entry.numberOfJudgesScored}">0</td>
-                <td class="final-score" th:text="${entry.averageScore}">0.0</td>
-            </tr>
-            </tbody>
-        </table>
+
+        <div class="table-responsive">
+            <table>
+                <thead>
+                <tr>
+                    <th style="width: 70px;">Rank</th>
+                    <th>Team</th>
+                    <th>Event</th>
+                    <th>Judges Evaluated</th>
+                    <th>Final Average</th>
+                </tr>
+                </thead>
+                <tbody>
+                <tr th:if="${#lists.isEmpty(leaderboard)}" class="empty-row">
+                    <td colspan="5">No scores submitted yet. Scores will appear once judges evaluate teams.</td>
+                </tr>
+                <tr th:each="entry : ${leaderboard}" th:classappend="'rank-' + ${entry.rank}">
+                    <td><span class="rank-badge" th:text="${entry.rank}">1</span></td>
+                    <td><strong th:text="${entry.teamName}">Team</strong></td>
+                    <td><span class="badge" th:text="${entry.eventName}">Event</span></td>
+                    <td th:text="${entry.numberOfJudgesScored}">0</td>
+                    <td class="final-score" th:text="${entry.averageScore}">0.0</td>
+                </tr>
+                </tbody>
+            </table>
+        </div>
     </div>
 </div>
 </body>

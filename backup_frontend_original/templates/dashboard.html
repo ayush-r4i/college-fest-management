@@ -1,0 +1,70 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Dashboard</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Dashboard</h1>
+    </div>
+
+    <div class="stats-grid">
+        <div class="stat-card">
+            <div class="value" th:text="${eventCount}">0</div>
+            <div class="label">Events</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" th:text="${teamCount}">0</div>
+            <div class="label">Teams</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" th:text="${participantCount}">0</div>
+            <div class="label">Participants</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" th:text="${judgeCount}">0</div>
+            <div class="label">Judges</div>
+        </div>
+        <div class="stat-card">
+            <div class="value" th:text="${scoreCount}">0</div>
+            <div class="label">Scores Submitted</div>
+        </div>
+    </div>
+
+    <div class="card">
+        <div class="page-header">
+            <h1 style="font-size:1.15rem">Top 5 Leaderboard</h1>
+            <a th:href="@{/leaderboard}" class="btn btn-sm btn-secondary">View Full Leaderboard</a>
+        </div>
+        <table>
+            <thead>
+            <tr>
+                <th>Rank</th>
+                <th>Team</th>
+                <th>Event</th>
+                <th>Judges Scored</th>
+                <th>Final Score</th>
+            </tr>
+            </thead>
+            <tbody>
+            <tr th:if="${#lists.isEmpty(leaderboard)}" class="empty-row">
+                <td colspan="5">No scores submitted yet.</td>
+            </tr>
+            <tr th:each="entry : ${leaderboard}">
+                <td><span class="rank-badge" th:text="${entry.rank}">1</span></td>
+                <td th:text="${entry.teamName}">Team</td>
+                <td th:text="${entry.eventName}">Event</td>
+                <td th:text="${entry.numberOfJudgesScored}">0</td>
+                <td class="final-score" th:text="${entry.averageScore}">0.0</td>
+            </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

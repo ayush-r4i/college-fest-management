@@ -2,6 +2,7 @@ package com.collegefest.management.service;
 
 import com.collegefest.management.entity.Participant;
 import com.collegefest.management.entity.Team;
+import com.collegefest.management.exception.DuplicateResourceException;
 import com.collegefest.management.exception.ResourceNotFoundException;
 import com.collegefest.management.repository.ParticipantRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +43,18 @@ public class ParticipantService {
         // Business rule: cannot exceed the event's max team size
         teamService.assertCanAddParticipant(team);
 
+        // Prevent leader from being added twice
+        if (isLeaderDuplicate(team, participant)) {
+            throw new DuplicateResourceException(
+                    "Team leader \"" + team.getLeaderName() + "\" is already registered as Participant #1 for this team");
+        }
+
+        // Prevent duplicate participant with the same name or email in the same team
+        if (isDuplicateInTeam(team, participant)) {
+            throw new DuplicateResourceException(
+                    "A participant with this name or email is already registered in team \"" + team.getTeamName() + "\"");
+        }
+
         participant.setTeam(team);
         return participantRepository.save(participant);
     }
@@ -60,5 +73,39 @@ public class ParticipantService {
     public void deleteParticipant(Long id) {
         Participant existing = getParticipantById(id);
         participantRepository.delete(existing);
+    }
+
+    private boolean isLeaderDuplicate(Team team, Participant participant) {
+        if (team.getLeaderName() != null && participant.getName() != null
+                && team.getLeaderName().trim().equalsIgnoreCase(participant.getName().trim())) {
+            return true;
+        }
+        if (team.getLeaderEmail() != null && !team.getLeaderEmail().trim().isEmpty()
+                && participant.getEmail() != null && !participant.getEmail().trim().isEmpty()
+                && team.getLeaderEmail().trim().equalsIgnoreCase(participant.getEmail().trim())) {
+            return true;
+        }
+        return false;
+    }
+
+    private boolean isDuplicateInTeam(Team team, Participant participant) {
+        if (team.getParticipants() == null || team.getParticipants().isEmpty()) {
+            return false;
+        }
+        for (Participant existing : team.getParticipants()) {
+            if (existing.getId() != null && existing.getId().equals(participant.getId())) {
+                continue;
+            }
+            if (existing.getName() != null && participant.getName() != null
+                    && existing.getName().trim().equalsIgnoreCase(participant.getName().trim())) {
+                return true;
+            }
+            if (existing.getEmail() != null && !existing.getEmail().trim().isEmpty()
+                    && participant.getEmail() != null && !participant.getEmail().trim().isEmpty()
+                    && existing.getEmail().trim().equalsIgnoreCase(participant.getEmail().trim())) {
+                return true;
+            }
+        }
+        return false;
     }
 }

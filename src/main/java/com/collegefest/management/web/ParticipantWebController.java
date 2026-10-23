@@ -1,6 +1,7 @@
 package com.collegefest.management.web;
 
 import com.collegefest.management.entity.Participant;
+import com.collegefest.management.exception.DuplicateResourceException;
 import com.collegefest.management.exception.TeamCapacityExceededException;
 import com.collegefest.management.service.ParticipantService;
 import com.collegefest.management.service.TeamService;
@@ -33,10 +34,11 @@ public class ParticipantWebController {
     }
 
     @GetMapping("/new")
-    public String newForm(Model model) {
+    public String newForm(@RequestParam(name = "teamId", required = false) Long teamId, Model model) {
         model.addAttribute("pageTitle", "Add Participant");
         model.addAttribute("participant", new Participant());
         model.addAttribute("teams", teamService.getAllTeams());
+        model.addAttribute("selectedTeamId", teamId);
         return "participant-form";
     }
 
@@ -49,15 +51,17 @@ public class ParticipantWebController {
         if (bindingResult.hasErrors()) {
             model.addAttribute("pageTitle", "Add Participant");
             model.addAttribute("teams", teamService.getAllTeams());
+            model.addAttribute("selectedTeamId", teamId);
             return "participant-form";
         }
         try {
             participantService.addParticipant(participant, teamId);
             redirectAttributes.addFlashAttribute("success", "Participant added successfully");
             return "redirect:/participants";
-        } catch (TeamCapacityExceededException ex) {
+        } catch (DuplicateResourceException | TeamCapacityExceededException ex) {
             model.addAttribute("pageTitle", "Add Participant");
             model.addAttribute("teams", teamService.getAllTeams());
+            model.addAttribute("selectedTeamId", teamId);
             model.addAttribute("error", ex.getMessage());
             return "participant-form";
         }

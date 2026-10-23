@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Event Form</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1 th:text="${pageTitle}">Add Event</h1>
+    </div>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <form th:action="${event.id == null} ? @{/events} : @{/events/{id}(id=${event.id})}"
+              th:object="${event}" method="post">
+
+            <div class="form-group">
+                <label for="name">Event Name</label>
+                <input type="text" id="name" th:field="*{name}" required placeholder="e.g. CodeStorm Hackathon">
+                <div class="field-error" th:if="${#fields.hasErrors('name')}" th:errors="*{name}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="description">Description</label>
+                <textarea id="description" th:field="*{description}" placeholder="Short description of the event"></textarea>
+            </div>
+
+            <div class="form-group">
+                <label for="venue">Venue</label>
+                <input type="text" id="venue" th:field="*{venue}" required placeholder="e.g. Main Auditorium">
+                <div class="field-error" th:if="${#fields.hasErrors('venue')}" th:errors="*{venue}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="category">Category</label>
+                <input type="text" id="category" th:field="*{category}" required placeholder="e.g. Hackathon, Cultural, Sports">
+                <div class="field-error" th:if="${#fields.hasErrors('category')}" th:errors="*{category}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="startTime">Start Time</label>
+                <input type="datetime-local" id="startTime" th:field="*{startTime}" required>
+                <div class="field-error" th:if="${#fields.hasErrors('startTime')}" th:errors="*{startTime}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="endTime">End Time</label>
+                <input type="datetime-local" id="endTime" th:field="*{endTime}" required>
+                <div class="field-error" th:if="${#fields.hasErrors('endTime')}" th:errors="*{endTime}"></div>
+            </div>
+
+            <div class="form-group">
+                <label for="maxTeamSize">Max Team Size</label>
+                <input type="number" id="maxTeamSize" th:field="*{maxTeamSize}" min="1" required>
+                <div class="field-error" th:if="${#fields.hasErrors('maxTeamSize')}" th:errors="*{maxTeamSize}"></div>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Save Event</button>
+                <a th:href="@{/events}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

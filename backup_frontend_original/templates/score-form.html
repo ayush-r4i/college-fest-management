@@ -1,0 +1,78 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title th:text="${pageTitle} + ' - College Fest Manager'">Submit Score</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div th:replace="~{fragments/nav :: navbar}"></div>
+
+<div class="container">
+    <div class="page-header">
+        <h1>Submit Score</h1>
+    </div>
+
+    <div class="alert alert-error" th:if="${error}" th:text="${error}"></div>
+
+    <div class="card form-card">
+        <p style="color:#6b7280;font-size:0.85rem;margin-top:0">
+            Each criterion is scored out of 10. The final score is calculated automatically
+            as the average of all five. Submitting again for the same team + judge updates
+            the existing score instead of creating a duplicate.
+        </p>
+
+        <form th:action="@{/scores}" th:object="${score}" method="post">
+
+            <div class="form-group">
+                <label for="teamId">Team</label>
+                <select id="teamId" name="teamId" required>
+                    <option value="">-- Select Team --</option>
+                    <option th:each="t : ${teams}"
+                            th:value="${t.id}"
+                            th:text="${t.teamName} + ' (' + (${t.event != null} ? ${t.event.name} : '') + ')'"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="judgeId">Judge</label>
+                <select id="judgeId" name="judgeId" required>
+                    <option value="">-- Select Judge --</option>
+                    <option th:each="j : ${judges}" th:value="${j.id}" th:text="${j.name}"></option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label for="innovation">Innovation (0-10)</label>
+                <input type="number" id="innovation" th:field="*{innovation}" min="0" max="10" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="technicalImplementation">Technical Implementation (0-10)</label>
+                <input type="number" id="technicalImplementation" th:field="*{technicalImplementation}" min="0" max="10" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="presentation">Presentation (0-10)</label>
+                <input type="number" id="presentation" th:field="*{presentation}" min="0" max="10" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="uiUx">UI/UX (0-10)</label>
+                <input type="number" id="uiUx" th:field="*{uiUx}" min="0" max="10" step="0.5" required>
+            </div>
+
+            <div class="form-group">
+                <label for="overallImpression">Overall Impression (0-10)</label>
+                <input type="number" id="overallImpression" th:field="*{overallImpression}" min="0" max="10" step="0.5" required>
+            </div>
+
+            <div class="form-actions">
+                <button type="submit" class="btn">Submit Score</button>
+                <a th:href="@{/scores}" class="btn btn-secondary">Cancel</a>
+            </div>
+        </form>
+    </div>
+</div>
+</body>
+</html>

@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <title>Error - College Fest Manager</title>
+    <link rel="stylesheet" th:href="@{/css/style.css}">
+</head>
+<body>
+<div class="container" style="max-width:600px;text-align:center;padding-top:4rem">
+    <div class="card">
+        <h1 style="margin-top:0">Something went wrong</h1>
+        <p style="color:#6b7280">
+            Status: <strong th:text="${status}">500</strong><br>
+            <span th:if="${error}" th:text="${error}"></span>
+        </p>
+        <p th:if="${message}" th:text="${message}" style="color:#991b1b"></p>
+        <a th:href="@{/dashboard}" class="btn">Back to Dashboard</a>
+    </div>
+</div>
+</body>
+</html>

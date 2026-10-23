@@ -53,9 +53,9 @@ public class TeamWebController {
             return "team-form";
         }
         try {
-            teamService.registerTeam(team, eventId);
-            redirectAttributes.addFlashAttribute("success", "Team registered successfully");
-            return "redirect:/teams";
+            Team savedTeam = teamService.registerTeam(team, eventId);
+            redirectAttributes.addFlashAttribute("success", "Team registered successfully! Now add the remaining members.");
+            return "redirect:/participants/new?teamId=" + savedTeam.getId();
         } catch (DuplicateResourceException | TeamCapacityExceededException ex) {
             model.addAttribute("pageTitle", "Register Team");
             model.addAttribute("events", eventService.getAllEvents());
